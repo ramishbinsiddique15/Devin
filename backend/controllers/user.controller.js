@@ -12,6 +12,7 @@ export const createUserController = async (req, res) => {
   try {
     const user = await userService.createUser(req.body);
     const token = user.generateToken();
+    delete user._doc.password;
     return res.status(201).json({ user, token });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -39,6 +40,7 @@ export const loginUserController = async (req, res) => {
     }
 
     const token = await user.generateToken();
+    delete user._doc.password;
     return res.json({ user, token });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -53,7 +55,7 @@ export const getUserProfileController = async (req, res) => {
 
 export const logoutUserController = async (req, res) => {
   try {
-    const token = req.headers.authorization.split(" ")[1] || req.cookies.token;
+    const token = req.headers.authorization?.split(" ")[1] || req.cookies.token;
     redisClient.set(token, "logout", "EX", 60 * 60 * 24);
     res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
