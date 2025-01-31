@@ -35,17 +35,27 @@ export const getAllProjects = async (req, res) => {
 };
 
 export const addUser = async (req, res) => {
-
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
   try {
     const { projectId, users } = req.body;
-    
+
     const loggedInUser = await userModel.findOne({ email: req.user.email });
     const userId = loggedInUser._id;
     const project = await projectService.addUsers({ projectId, users, userId });
+    return res.status(200).json({ project: project });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(err.message);
+  }
+};
+
+export const getProject = async (req, res) => {
+  const projectId = req.params.projectId;
+  try {
+    const project = await projectService.getProject({ projectId });
     return res.status(200).json({ project: project });
   } catch (err) {
     console.error(err);

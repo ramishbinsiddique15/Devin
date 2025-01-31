@@ -1,11 +1,15 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { UserContext } from "../context/user.context";
 import axios from "../config/axios";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const { user } = useContext(UserContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
+  const [project, setProject] = useState([]);
+
+  const navigate = useNavigate();
 
   const createProject = (e) => {
     e.preventDefault();
@@ -29,16 +33,63 @@ const Home = () => {
     setProjectName("");
   };
 
+  useEffect(() => {
+    // Fetch user's projects when the component mounts
+    axios
+      .get("/projects/all")
+      .then((res) => {
+        console.log(res.data);
+        setProject(res.data.projects);
+      })
+      .catch((err) => {
+        console.error(err.response?.data || err.message);
+      });
+  }, []); // Only fetch projects when user or token changes
+
   return (
     <main className="p-4 bg-gray-900 min-h-screen text-gray-100">
       {/* Projects Button */}
-      <div className="projects">
+      <div className="flex flex-wrap items-center gap-4">
+        {/* Create Project Button */}
         <button
           onClick={() => setIsModalOpen(true)}
-          className="project p-2 border border-gray-600 rounded-md text-gray-100 bg-gray-800 hover:bg-gray-700 transition duration-200"
+          className="project cursor-pointer flex items-center justify-between p-2 h-12 border border-gray-600 rounded-md text-gray-100 bg-gray-800 hover:bg-gray-700 transition duration-200 min-w-[200px] w-full sm:w-auto"
         >
-          <i className="ri-link"></i> Create Project
+          <div className="flex items-center gap-2">
+            <i className="ri-link text-blue-400"></i>
+            <span className="font-medium">Create Project</span>
+          </div>
+          <div className="flex items-center gap-1 bg-gray-700 px-2 py-1 rounded-md">
+            <i className="ri-sticky-note-add-line text-gray-300"></i>
+          </div>
         </button>
+
+        {/* Render Projects */}
+        {project.map((project) => (
+          <div
+            onClick={() =>
+              navigate("/project", {
+                state: { project },
+              })
+            }
+            key={project._id}
+            className="project cursor-pointer flex items-center justify-between p-2 h-12 border border-gray-600 rounded-md text-gray-100 bg-gray-800 hover:bg-gray-700 transition duration-200 min-w-[200px] w-full sm:w-auto"
+          >
+            {/* Project Name */}
+            <div className="flex items-center gap-2">
+              <i className="ri-link text-blue-400"></i>
+              <span className="font-medium capitalize">{project.name}</span>
+            </div>
+
+            {/* User Count */}
+            <div className="flex items-center gap-1 bg-gray-700 px-2 py-1 rounded-md">
+              <i className="ri-user-line text-gray-300"></i>
+              <span className="text-sm font-medium">
+                {project.users.length}
+              </span>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Modal */}

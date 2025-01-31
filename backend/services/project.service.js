@@ -45,7 +45,7 @@ export const addUsers = async ({ projectId, users, userId }) => {
     throw new Error("Invalid user ID");
   }
 
-  const project = await projectModel.finOne({
+  const project = await projectModel.findOne({
     _id: projectId,
     users: userId,
   });
@@ -58,5 +58,17 @@ export const addUsers = async ({ projectId, users, userId }) => {
     { $addToSet: { users: { $each: users } } },
     { new: true }
   );
-  return updatedProject;    
+  return updatedProject;
+};
+
+export const getProject = async ({ projectId }) => {
+  if (!projectId) {
+    throw new Error("Project ID is required");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(projectId)) {
+    throw new Error("Invalid project ID");
+  }
+  const project = await projectModel.findById(projectId).populate('users');
+  return project;
 };
