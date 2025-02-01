@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-.chat-container::-webkit-scrollbar{
-    display: none;
+.chat-container::-webkit-scrollbar {
+  display: none;
+}
+.user-list::-webkit-scrollbar {
+  display: none;
 }
